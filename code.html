@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicine Predictor</title>
+    <style>
+        /* Global Styles */
+body {
+    background: linear-gradient(to right, #4facfe, #00f2fe);
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+/* Card Container */
+.container {
+    max-width: 600px;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    animation: fadeIn 0.8s ease-in-out;
+}
+
+/* Headings */
+h2 {
+    color: #007bff;
+    font-weight: 600;
+}
+
+/* Form Styling */
+.form-label {
+    font-weight: bold;
+    color: #444;
+}
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Input Focus Effect */
+input:focus, select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
+    outline: none;
+}
+
+/* Button Styles */
+.btn-primary {
+    background: linear-gradient(to right, #007bff, #00f2fe);
+    color: white;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s ease-in-out;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(to right, #00f2fe, #007bff);
+    transform: scale(1.05);
+}
+
+/* Results Section */
+.result {
+    margin-top: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #007bff;
+}
+
+/* Table Styles */
+table {
+    width: 100%;
+    margin-top: 15px;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 10px;
+    border: 2px solid #ddd;
+    text-align: left;
+}
+
+th {
+    background: #007bff;
+    color: white;
+}
+
+td {
+    background: #f9f9f9;
+}
+
+/* Hover Effect for Table */
+tr:hover {
+    background: rgba(0, 123, 255, 0.1);
+}
+
+/* Fade-In Animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        width: 90%;
+    }
+}
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 class="text-center">Medicine Prediction</h2>
+    
+    <form id="medicineForm">
+        <div class="mb-3">
+            <label for="symptoms" class="form-label">Enter Symptoms:</label>
+            <input type="text" class="form-control" id="symptoms" placeholder="e.g., Fever, Cough">
+        </div>
+
+        <div class="mb-3">
+            <label for="age" class="form-label">Enter Age:</label>
+            <input type="number" class="form-control" id="age" placeholder="e.g., 25" min="1">
+            <p id="ageError" class="text-danger" style="display: none;">❌ Age must be a positive number.</p>
+        </div>
+        
+        <div class="mb-3">
+            <label for="history" class="form-label">Medical History:</label>
+            <select class="form-select" id="history">
+                <option value="None">No Medical History</option>
+                <option value="Diabetes">Diabetes</option>
+                <option value="Hypertension">Hypertension</option>
+                <option value="Asthma">Asthma</option>
+                <option value="Heart Disease">Heart Disease</option>
+            </select>
+        </div>
+
+        <button type="button" class="btn btn-primary" onclick="getRecommendation()">Find the Right Medicine</button>
+
+        <p class="result text-center" id="result"></p>
+
+        <p class="text-danger text-center mt-3">⚠️ Disclaimer: Always consult a doctor before taking any medication.</p>
+    </form>
+</div>
+
+<script>
+    async function getRecommendation() {
+    let symptoms = document.getElementById("symptoms").value.trim();
+    let age = document.getElementById("age").value;
+    let history = document.getElementById("history").value;
+    let result = document.getElementById("result");
+
+    if (symptoms === "" || age === "") {
+        result.innerHTML = "❌ Please fill in all fields.";
+        result.style.color = "red";
+        return;
+    }
+
+    let response = await fetch(`http://127.0.0.1:5000/predict?symptom=${symptoms}&age=${age}&history=${history}`);
+    let data = await response.json();
+
+    if (data.medicines) {
+        let output = `<strong>Recommended Medicines:</strong><br>`;
+        data.medicines.forEach((med, index) => {
+            output += `✅ ${med} (Formula: ${data.formulas[index]})<br>`;
+        });
+        result.innerHTML = output;
+        result.style.color = "#007bff";
+    } else {
+        result.innerHTML = "❌ No suitable medicine found.";
+        result.style.color = "red";
+    }
+}
+
+
+</script>
+
+</body>
+</html>
